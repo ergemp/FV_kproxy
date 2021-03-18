@@ -1,16 +1,24 @@
 package org.ergemp.fv.kproxy.model;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.deser.impl.CreatorCandidate;
+
 public class GenericDataModel {
     private String token;
     private Long ts;
     private String label;
     private String payload;
 
-    public GenericDataModel(String gToken, Long gTs, String gLabel, String gPayload){
+    public GenericDataModel(String gToken, Long gTs, String gLabel, String gPayload) {
         this.token = gToken;
         this.ts = gTs;
         this.label = gLabel;
         this.payload = gPayload;
+    }
+
+    public GenericDataModel() {
+
     }
 
     public String getToken() {
@@ -43,5 +51,18 @@ public class GenericDataModel {
 
     public void setPayload(String payload) {
         this.payload = payload;
+    }
+
+    public String toString() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        String retVal = "";
+        try {
+            retVal = objectMapper.writeValueAsString(this);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        finally {
+            return retVal;
+        }
     }
 }

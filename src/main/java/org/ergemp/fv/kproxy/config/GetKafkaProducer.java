@@ -17,7 +17,8 @@ public class GetKafkaProducer {
             props.put(ProducerConfig.CLIENT_ID_CONFIG, gClientId);  //client.id
             props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, KafkaConfig.KEY_SERIALIZER_CLASS_CONFIG);  //key.serializer
             props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, KafkaConfig.VALUE_SERIALIZER_CLASS_CONFIG);  //value.serializer
-
+            props.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, 5000);
+            props.put(ProducerConfig.DELIVERY_TIMEOUT_MS_CONFIG, 5000);
             producer = new KafkaProducer<String, String>(props);
         }
         catch(Exception ex){

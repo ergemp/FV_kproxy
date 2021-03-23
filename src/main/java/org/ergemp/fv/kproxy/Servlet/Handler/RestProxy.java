@@ -7,6 +7,7 @@ import org.ergemp.fv.kproxy.Servlet.Response.Response200;
 import org.ergemp.fv.kproxy.Servlet.Response.Response400;
 import org.ergemp.fv.kproxy.Servlet.Response.Response500;
 import org.ergemp.fv.kproxy.actor.SendMessage;
+import org.ergemp.fv.kproxy.actor.ValidateToken;
 import org.ergemp.fv.kproxy.config.GetKafkaProducer;
 import org.ergemp.fv.kproxy.model.GenericDataModel;
 
@@ -16,8 +17,13 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Map;
 
 public class RestProxy extends HttpServlet {
+
+    private Map<String, Boolean> tokenValidation = new HashMap<>();
+
     @Override
     protected void doPost(HttpServletRequest request,
                           HttpServletResponse response) throws IOException {
@@ -42,19 +48,24 @@ public class RestProxy extends HttpServlet {
                 jsonObj.get("payload") != null
         ) {
 
+            //check if token is valid
+            if (tokenValidation.get(jsonObj.get("token").textValue()) == null) {
+                tokenValidation.put(jsonObj.get("token").textValue(), ValidateToken.validate(jsonObj.get("token").textValue())) ;
+            }
+            else if (!tokenValidation.get(jsonObj.get("token").textValue()).booleanValue()){
+                tokenValidation.put(jsonObj.get("token").textValue(), ValidateToken.validate(jsonObj.get("token").textValue()));
+            }
+
             Producer producer = GetKafkaProducer.get("RestProxy01");
 
-
             GenericDataModel model = new GenericDataModel(
-                    "f2d52d8e-26f3-40c1-910a-4c6a001f2589",
+                    jsonObj.get("token").textValue(),
                     System.currentTimeMillis(),
                     jsonObj.get("label").textValue(),
                     jsonObj.get("payload").textValue() );
 
             SendMessage.send(producer, jsonObj.get("token").textValue(), model.toString());
-
             System.out.print(model.toString());
-
             producer.close();
 
             Response200.set200(response);
